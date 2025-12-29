@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -578,7 +577,7 @@
                         <h2 id="playerTitle">Selecciona una canción</h2>
                         <p id="playerArtist">Toca en la pestaña Buscar</p>
                     </div>
-                    <audio id="audioPlayer" style="width: 100%; max-width: 300px; margin: 15px 0;"></audio>
+                    <div id="youtubePlayer" style="width: 100%; max-width: 300px; margin: 15px 0; background: #1a1a1a; border-radius: 8px; overflow: hidden;"></div>
                     <div class="progress-bar">
                         <input type="range" id="progressSlider" min="0" max="100" value="0">
                     </div>
@@ -660,29 +659,38 @@
     </div>
 
     <script>
-        // DATOS DE CANCIONES CON URLs DE AUDIO REALES
+        // DATOS DE CANCIONES CON LINKS DE YOUTUBE
         const songs = [
-            { id: 1, title: "Blinding Lights", artist: "The Weeknd", duration: 200, audio: "https://preview.redd.it/s93m8p5zh6k71.mp3?format=mp3&s=b5c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3" },
-            { id: 2, title: "Shape of You", artist: "Ed Sheeran", duration: 234, audio: "https://www.redditstatic.com/ads/reddit-2021/Shape.mp3" },
-            { id: 3, title: "Levitating", artist: "Dua Lipa", duration: 203, audio: "https://www.chosic.com/wp-content/uploads/2021/07/Levitating.mp3" },
-            { id: 4, title: "Anti-Hero", artist: "Taylor Swift", duration: 209, audio: "https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-download/2015/01/Swift-Anti-Hero.mp3" },
-            { id: 5, title: "Flowers", artist: "Miley Cyrus", duration: 218, audio: "https://www.zapsplat.com/wp-content/uploads/2023/miley-cyrus-flowers.mp3" },
-            { id: 6, title: "Heat Waves", artist: "Glass Animals", duration: 239, audio: "https://www.chosic.com/wp-content/uploads/2021/07/Heat-Waves.mp3" },
-            { id: 7, title: "As It Was", artist: "Harry Styles", duration: 169, audio: "https://www.zapsplat.com/wp-content/uploads/2022/04/Harry-Styles-As-It-Was.mp3" },
-            { id: 8, title: "Running Up That Hill", artist: "Kate Bush", duration: 305, audio: "https://www.chosic.com/wp-content/uploads/2022/running-up-that-hill.mp3" },
-            { id: 9, title: "Unholy", artist: "Sam Smith & Kim Petras", duration: 187, audio: "https://www.zapsplat.com/wp-content/uploads/2022/Unholy.mp3" },
-            { id: 10, title: "Boy With Luv", artist: "BTS ft. Halsey", duration: 244, audio: "https://www.chosic.com/wp-content/uploads/2021/boy-with-luv.mp3" },
-            { id: 11, title: "Bad Habit", artist: "Steve Lacy", duration: 196, audio: "https://www.zapsplat.com/wp-content/uploads/2023/Steve-Lacy-Bad-Habit.mp3" },
-            { id: 12, title: "Vampire", artist: "Olivia Rodrigo", duration: 241, audio: "https://www.chosic.com/wp-content/uploads/2023/vampire-olivia-rodrigo.mp3" },
+            { id: 1, title: "Blinding Lights", artist: "The Weeknd", duration: 200, youtubeId: "woKj0wvXs50" },
+            { id: 2, title: "Shape of You", artist: "Ed Sheeran", duration: 234, youtubeId: "JGwWNGJdvx8" },
+            { id: 3, title: "Levitating", artist: "Dua Lipa", duration: 203, youtubeId: "TUVcZfQe-Kc" },
+            { id: 4, title: "Anti-Hero", artist: "Taylor Swift", duration: 209, youtubeId: "b1dJYy0-lJE" },
+            { id: 5, title: "Flowers", artist: "Miley Cyrus", duration: 218, youtubeId: "G7lzuR5CPM8" },
+            { id: 6, title: "Heat Waves", artist: "Glass Animals", duration: 239, youtubeId: "mHXbh6gjj8E" },
+            { id: 7, title: "As It Was", artist: "Harry Styles", duration: 169, youtubeId: "H5v3kku4y6Q" },
+            { id: 8, title: "Running Up That Hill", artist: "Kate Bush", duration: 305, youtubeId: "wp43OdtAAkM" },
+            { id: 9, title: "Unholy", artist: "Sam Smith & Kim Petras", duration: 187, youtubeId: "FkhUJVtKW-4" },
+            { id: 10, title: "Boy With Luv", artist: "BTS ft. Halsey", duration: 244, youtubeId: "XrADtsMtDwI" },
+            { id: 11, title: "Bad Habit", artist: "Steve Lacy", duration: 196, youtubeId: "ZTjkKj6S2s4" },
+            { id: 12, title: "Vampire", artist: "Olivia Rodrigo", duration: 241, youtubeId: "nQA3-k3tEwI" },
         ];
 
-        let audioPlayer = new Audio();
-
+        let player;
         let playlists = [];
         let currentSong = null;
         let isPlaying = false;
         let currentTab = 'search';
         let selectedSongForPlaylist = null;
+
+        // Cargar YouTube IFrame API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function onYouTubeIframeAPIReady() {
+            console.log('YouTube API listo');
+        }
 
         // CARGAR DATOS DEL ALMACENAMIENTO LOCAL
         function loadData() {
@@ -748,9 +756,10 @@
                 document.getElementById('progressSlider').value = 0;
                 document.getElementById('currentTime').textContent = '0:00';
                 
-                // Cargar audio
-                audioPlayer.src = currentSong.audio;
-                audioPlayer.play();
+                // Crear/actualizar reproductor YouTube
+                const playerDiv = document.getElementById('youtubePlayer');
+                playerDiv.innerHTML = `<iframe width="100%" height="300" src="https://www.youtube.com/embed/${currentSong.youtubeId}?autoplay=1&controls=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                
                 isPlaying = true;
                 updatePlayButton();
                 switchTab('player');
@@ -760,11 +769,6 @@
         // BOTÓN PLAY/PAUSE
         document.getElementById('playButton').addEventListener('click', () => {
             if (currentSong) {
-                if (isPlaying) {
-                    audioPlayer.pause();
-                } else {
-                    audioPlayer.play();
-                }
                 isPlaying = !isPlaying;
                 updatePlayButton();
             }
@@ -775,23 +779,8 @@
             playBtn.textContent = isPlaying ? '⏸️' : '▶️';
         }
 
-        // Actualizar barra de progreso mientras se reproduce
-        audioPlayer.addEventListener('timeupdate', () => {
-            if (currentSong) {
-                document.getElementById('progressSlider').value = audioPlayer.currentTime;
-                document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
-            }
-        });
-
-        // Cambiar duración real del audio
-        audioPlayer.addEventListener('loadedmetadata', () => {
-            document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
-            document.getElementById('progressSlider').max = audioPlayer.duration;
-        });
-
         // PROGRESO DE LA CANCIÓN
         document.getElementById('progressSlider').addEventListener('input', (e) => {
-            audioPlayer.currentTime = e.target.value;
             document.getElementById('currentTime').textContent = formatTime(e.target.value);
         });
 
