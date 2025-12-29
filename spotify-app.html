@@ -264,6 +264,23 @@
             transform: scale(1.05);
         }
 
+        .spotify-button {
+            background: #1DB954;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 15px 0;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .spotify-button:hover {
+            background: #1ed760;
+        }
+
         .btn-control {
             background: none;
             border: none;
@@ -560,6 +577,9 @@
                         <h2 id="playerTitle">Selecciona una canción</h2>
                         <p id="playerArtist">Toca en la pestaña Buscar</p>
                     </div>
+                    <button class="spotify-button" id="spotifyButton" style="display: none;">
+                        🎵 Reproducir en Spotify
+                    </button>
                     <div class="progress-bar">
                         <input type="range" id="progressSlider" min="0" max="100" value="0">
                     </div>
@@ -643,18 +663,18 @@
     <script>
         // DATOS DE CANCIONES
         const songs = [
-            { id: 1, title: "Blinding Lights", artist: "The Weeknd", duration: 200 },
-            { id: 2, title: "Shape of You", artist: "Ed Sheeran", duration: 234 },
-            { id: 3, title: "Levitating", artist: "Dua Lipa", duration: 203 },
-            { id: 4, title: "Anti-Hero", artist: "Taylor Swift", duration: 209 },
-            { id: 5, title: "Flowers", artist: "Miley Cyrus", duration: 218 },
-            { id: 6, title: "Heat Waves", artist: "Glass Animals", duration: 239 },
-            { id: 7, title: "As It Was", artist: "Harry Styles", duration: 169 },
-            { id: 8, title: "Running Up That Hill", artist: "Kate Bush", duration: 305 },
-            { id: 9, title: "Unholy", artist: "Sam Smith & Kim Petras", duration: 187 },
-            { id: 10, title: "Boy With Luv", artist: "BTS ft. Halsey", duration: 244 },
-            { id: 11, title: "Bad Habit", artist: "Steve Lacy", duration: 196 },
-            { id: 12, title: "Vampire", artist: "Olivia Rodrigo", duration: 241 },
+            { id: 1, title: "Blinding Lights", artist: "The Weeknd", duration: 200, spotifyId: "0VjIjW4GlUZAMYd2vXMwbk" },
+            { id: 2, title: "Shape of You", artist: "Ed Sheeran", duration: 234, spotifyId: "7qiZfU4dY1lsylvNEJsRj3" },
+            { id: 3, title: "Levitating", artist: "Dua Lipa", duration: 203, spotifyId: "3crS56IADQu8gI9wO5Qry7" },
+            { id: 4, title: "Anti-Hero", artist: "Taylor Swift", duration: 209, spotifyId: "0gytdKBOTSoRvW2cAYeDVe" },
+            { id: 5, title: "Flowers", artist: "Miley Cyrus", duration: 218, spotifyId: "2takcwgFH3wt9zeDQoCLrF" },
+            { id: 6, title: "Heat Waves", artist: "Glass Animals", duration: 239, spotifyId: "5XeFesFbtLpXzIVDNQP79" },
+            { id: 7, title: "As It Was", artist: "Harry Styles", duration: 169, spotifyId: "7qiZfU4dY1lsylvNEJsRj3" },
+            { id: 8, title: "Running Up That Hill", artist: "Kate Bush", duration: 305, spotifyId: "3cB8C56xFb0SL0XK3PwPcI" },
+            { id: 9, title: "Unholy", artist: "Sam Smith & Kim Petras", duration: 187, spotifyId: "1mWRgRgzR3ZXW7Pnl9k5FJ" },
+            { id: 10, title: "Boy With Luv", artist: "BTS ft. Halsey", duration: 244, spotifyId: "63rPSO254uJ05YvMNSBZr2" },
+            { id: 11, title: "Bad Habit", artist: "Steve Lacy", duration: 196, spotifyId: "1qJqGPQITBhvd7Kf0dIa9m" },
+            { id: 12, title: "Vampire", artist: "Olivia Rodrigo", duration: 241, spotifyId: "3Bdh0cOi5ddyXEgJPOwB3D" },
         ];
 
         let playlists = [];
@@ -724,6 +744,14 @@
                 document.getElementById('playerArtist').textContent = currentSong.artist;
                 document.getElementById('duration').textContent = formatTime(currentSong.duration);
                 document.getElementById('progressSlider').max = currentSong.duration;
+                
+                // Mostrar botón de Spotify
+                const spotifyBtn = document.getElementById('spotifyButton');
+                spotifyBtn.style.display = 'block';
+                spotifyBtn.onclick = () => {
+                    window.open(`https://open.spotify.com/track/${currentSong.spotifyId}`, '_blank');
+                };
+                
                 isPlaying = true;
                 updatePlayButton();
                 switchTab('player');
