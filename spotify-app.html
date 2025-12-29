@@ -577,9 +577,7 @@
                         <h2 id="playerTitle">Selecciona una canción</h2>
                         <p id="playerArtist">Toca en la pestaña Buscar</p>
                     </div>
-                    <button class="spotify-button" id="spotifyButton" style="display: none;">
-                        🎵 Reproducir en Spotify
-                    </button>
+                    <audio id="audioPlayer" style="width: 100%; max-width: 300px; margin: 15px 0;"></audio>
                     <div class="progress-bar">
                         <input type="range" id="progressSlider" min="0" max="100" value="0">
                     </div>
@@ -661,21 +659,23 @@
     </div>
 
     <script>
-        // DATOS DE CANCIONES
+        // DATOS DE CANCIONES CON URLs DE AUDIO
         const songs = [
-            { id: 1, title: "Blinding Lights", artist: "The Weeknd", duration: 200, spotifyId: "0VjIjW4GlUZAMYd2vXMwbk" },
-            { id: 2, title: "Shape of You", artist: "Ed Sheeran", duration: 234, spotifyId: "7qiZfU4dY1lsylvNEJsRj3" },
-            { id: 3, title: "Levitating", artist: "Dua Lipa", duration: 203, spotifyId: "3crS56IADQu8gI9wO5Qry7" },
-            { id: 4, title: "Anti-Hero", artist: "Taylor Swift", duration: 209, spotifyId: "0gytdKBOTSoRvW2cAYeDVe" },
-            { id: 5, title: "Flowers", artist: "Miley Cyrus", duration: 218, spotifyId: "2takcwgFH3wt9zeDQoCLrF" },
-            { id: 6, title: "Heat Waves", artist: "Glass Animals", duration: 239, spotifyId: "5XeFesFbtLpXzIVDNQP79" },
-            { id: 7, title: "As It Was", artist: "Harry Styles", duration: 169, spotifyId: "7qiZfU4dY1lsylvNEJsRj3" },
-            { id: 8, title: "Running Up That Hill", artist: "Kate Bush", duration: 305, spotifyId: "3cB8C56xFb0SL0XK3PwPcI" },
-            { id: 9, title: "Unholy", artist: "Sam Smith & Kim Petras", duration: 187, spotifyId: "1mWRgRgzR3ZXW7Pnl9k5FJ" },
-            { id: 10, title: "Boy With Luv", artist: "BTS ft. Halsey", duration: 244, spotifyId: "63rPSO254uJ05YvMNSBZr2" },
-            { id: 11, title: "Bad Habit", artist: "Steve Lacy", duration: 196, spotifyId: "1qJqGPQITBhvd7Kf0dIa9m" },
-            { id: 12, title: "Vampire", artist: "Olivia Rodrigo", duration: 241, spotifyId: "3Bdh0cOi5ddyXEgJPOwB3D" },
+            { id: 1, title: "Blinding Lights", artist: "The Weeknd", duration: 200, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+            { id: 2, title: "Shape of You", artist: "Ed Sheeran", duration: 234, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+            { id: 3, title: "Levitating", artist: "Dua Lipa", duration: 203, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+            { id: 4, title: "Anti-Hero", artist: "Taylor Swift", duration: 209, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+            { id: 5, title: "Flowers", artist: "Miley Cyrus", duration: 218, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+            { id: 6, title: "Heat Waves", artist: "Glass Animals", duration: 239, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3" },
+            { id: 7, title: "As It Was", artist: "Harry Styles", duration: 169, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" },
+            { id: 8, title: "Running Up That Hill", artist: "Kate Bush", duration: 305, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
+            { id: 9, title: "Unholy", artist: "Sam Smith & Kim Petras", duration: 187, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" },
+            { id: 10, title: "Boy With Luv", artist: "BTS ft. Halsey", duration: 244, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
+            { id: 11, title: "Bad Habit", artist: "Steve Lacy", duration: 196, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
+            { id: 12, title: "Vampire", artist: "Olivia Rodrigo", duration: 241, audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" },
         ];
+
+        let audioPlayer = new Audio();
 
         let playlists = [];
         let currentSong = null;
@@ -744,14 +744,12 @@
                 document.getElementById('playerArtist').textContent = currentSong.artist;
                 document.getElementById('duration').textContent = formatTime(currentSong.duration);
                 document.getElementById('progressSlider').max = currentSong.duration;
+                document.getElementById('progressSlider').value = 0;
+                document.getElementById('currentTime').textContent = '0:00';
                 
-                // Mostrar botón de Spotify
-                const spotifyBtn = document.getElementById('spotifyButton');
-                spotifyBtn.style.display = 'block';
-                spotifyBtn.onclick = () => {
-                    window.open(`https://open.spotify.com/track/${currentSong.spotifyId}`, '_blank');
-                };
-                
+                // Cargar audio
+                audioPlayer.src = currentSong.audio;
+                audioPlayer.play();
                 isPlaying = true;
                 updatePlayButton();
                 switchTab('player');
@@ -761,6 +759,11 @@
         // BOTÓN PLAY/PAUSE
         document.getElementById('playButton').addEventListener('click', () => {
             if (currentSong) {
+                if (isPlaying) {
+                    audioPlayer.pause();
+                } else {
+                    audioPlayer.play();
+                }
                 isPlaying = !isPlaying;
                 updatePlayButton();
             }
@@ -771,8 +774,23 @@
             playBtn.textContent = isPlaying ? '⏸️' : '▶️';
         }
 
+        // Actualizar barra de progreso mientras se reproduce
+        audioPlayer.addEventListener('timeupdate', () => {
+            if (currentSong) {
+                document.getElementById('progressSlider').value = audioPlayer.currentTime;
+                document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
+            }
+        });
+
+        // Cambiar duración real del audio
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
+            document.getElementById('progressSlider').max = audioPlayer.duration;
+        });
+
         // PROGRESO DE LA CANCIÓN
         document.getElementById('progressSlider').addEventListener('input', (e) => {
+            audioPlayer.currentTime = e.target.value;
             document.getElementById('currentTime').textContent = formatTime(e.target.value);
         });
 
@@ -979,18 +997,11 @@
             }
         });
 
-        // SIMULAR REPRODUCCIÓN
-        setInterval(() => {
-            if (isPlaying && currentSong) {
-                const slider = document.getElementById('progressSlider');
-                let currentTime = parseInt(slider.value) + 1;
-                if (currentTime > currentSong.duration) {
-                    currentTime = 0;
-                }
-                slider.value = currentTime;
-                document.getElementById('currentTime').textContent = formatTime(currentTime);
-            }
-        }, 1000);
+        // Cuando termina la canción
+        audioPlayer.addEventListener('ended', () => {
+            isPlaying = false;
+            updatePlayButton();
+        });
 
         // INICIALIZAR
         loadData();
